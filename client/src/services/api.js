@@ -80,6 +80,18 @@ export const postService = {
     return response.data;
   },
 
+  // Upload an image
+  uploadImage: async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await api.post('/posts/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
   // Search posts
   searchPosts: async (query) => {
     const response = await api.get(`/posts/search?q=${query}`);

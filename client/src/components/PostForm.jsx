@@ -41,10 +41,46 @@ const PostForm = ({ post = null, onSubmit }) => {
     }));
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLoading(true);
+    setError('');
+    try {
+      const { imageUrl } = await postService.uploadImage(file);
+      setFormData(prev => ({ ...prev, featuredImage: imageUrl }));
+    } catch (err) {
+      setError('Image upload failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const validate = () => {
+    if (!formData.title || formData.title.length < 5) {
+      setError('Title must be at least 5 characters');
+      return false;
+    }
+    if (!formData.content || formData.content.length < 20) {
+      setError('Content must be at least 20 characters');
+      return false;
+    }
+    if (!formData.category) {
+      setError('Please select a category');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (!validate()) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const postData = {
@@ -147,15 +183,25 @@ const PostForm = ({ post = null, onSubmit }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Featured Image URL (Optional)
+            Featured Image (Upload or URL)
           </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="mb-2"
+          />
           <input
             type="url"
             name="featuredImage"
             value={formData.featuredImage}
             onChange={handleChange}
+            placeholder="Or paste image URL"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          {formData.featuredImage && (
+            <img src={formData.featuredImage} alt="Preview" className="mt-2 max-h-40 rounded" />
+          )}
         </div>
 
         <div>

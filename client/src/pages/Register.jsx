@@ -22,13 +22,37 @@ const Register = () => {
     }));
   };
 
+  const validate = () => {
+    if (!formData.username || formData.username.length < 3) {
+      setError('Username must be at least 3 characters');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Invalid email address');
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+    if (!/[A-Z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
+      setError('Password must contain at least one uppercase letter and one number');
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    if (!validate()) {
       setLoading(false);
       return;
     }
