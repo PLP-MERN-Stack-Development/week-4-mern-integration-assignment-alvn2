@@ -11,6 +11,8 @@ const path = require('path');
 const postRoutes = require('./routes/posts');
 const categoryRoutes = require('./routes/categories');
 const authRoutes = require('./routes/auth');
+const connectDB = require('./config/database');
+const errorHandler = require('./middleware/errorHandler');
 
 // Load environment variables
 dotenv.config();
@@ -46,27 +48,14 @@ app.get('/', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.statusCode || 500).json({
-    success: false,
-    error: err.message || 'Server Error',
-  });
-});
+app.use(errorHandler);
 
 // Connect to MongoDB and start server
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Failed to connect to MongoDB', err);
-    process.exit(1);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
   });
+});
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
